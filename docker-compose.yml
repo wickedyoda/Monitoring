@@ -4,6 +4,7 @@ services:
   db:
     image: mariadb:10
     container_name: librenms_db
+    platform: linux/arm64
     env_file:
       - ./env.env
     command:
@@ -14,15 +15,23 @@ services:
       - --collation-server=utf8mb4_unicode_ci
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -uroot -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     restart: unless-stopped
 
   db-init:
     image: mariadb:10
     container_name: librenms_db_init
+    platform: linux/arm64
     env_file:
       - ./env.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: >
       sh -c "
       until mariadb -h db -uroot -p$${MARIADB_ROOT_PASSWORD} -e 'SELECT 1' >/dev/null 2>&1; do
@@ -39,13 +48,20 @@ services:
   redis:
     image: redis:7.2-alpine
     container_name: librenms_redis
+    platform: linux/arm64
     env_file:
       - ./env.env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     restart: unless-stopped
 
   msmtpd:
     image: crazymax/msmtpd:latest
     container_name: librenms_msmtpd
+    platform: linux/arm64
     env_file:
       - ./env.env
     restart: unless-stopped
@@ -54,15 +70,19 @@ services:
     image: librenms/librenms:latest
     container_name: librenms
     hostname: librenms
+    platform: linux/arm64
     cap_add:
       - NET_ADMIN
       - NET_RAW
     env_file:
       - ./env.env
     depends_on:
-      - db
-      - redis
-      - msmtpd
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      msmtpd:
+        condition: service_started
     ports:
       - "8000:8000"
     volumes:
@@ -73,14 +93,17 @@ services:
     image: librenms/librenms:latest
     container_name: librenms_dispatcher
     hostname: librenms-dispatcher
+    platform: linux/arm64
     cap_add:
       - NET_ADMIN
       - NET_RAW
     env_file:
       - ./env.env
     depends_on:
-      - librenms
-      - redis
+      librenms:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       - SIDECAR_DISPATCHER=1
     volumes:
@@ -91,14 +114,17 @@ services:
     image: librenms/librenms:latest
     container_name: librenms_syslogng
     hostname: librenms-syslogng
+    platform: linux/arm64
     cap_add:
       - NET_ADMIN
       - NET_RAW
     env_file:
       - ./env.env
     depends_on:
-      - librenms
-      - redis
+      librenms:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       - SIDECAR_SYSLOGNG=1
     ports:
@@ -112,14 +138,17 @@ services:
     image: librenms/librenms:latest
     container_name: librenms_snmptrapd
     hostname: librenms-snmptrapd
+    platform: linux/arm64
     cap_add:
       - NET_ADMIN
       - NET_RAW
     env_file:
       - ./env.env
     depends_on:
-      - librenms
-      - redis
+      librenms:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       - SIDECAR_SNMPTRAPD=1
     ports:
@@ -171,17 +200,19 @@ services:
     image: prom/node-exporter:latest
     container_name: node_exporter
     platform: linux/arm64
+    pid: host
     ports:
       - "9100:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - /run/udev:/run/udev:ro
     command:
       - --path.procfs=/host/proc
       - --path.rootfs=/rootfs
       - --path.sysfs=/host/sys
-      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($|/)
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|run/docker/netns)($|/)
     restart: unless-stopped
 
   cadvisor:
@@ -194,6 +225,7 @@ services:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - /var/lib/docker:/var/lib/docker:ro
       - /dev/disk:/dev/disk:ro
     privileged: true
@@ -231,7 +263,7 @@ services:
       - ./env.env
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       db-init:
         condition: service_completed_successfully
       prometheus:
