@@ -14,7 +14,7 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     volumes:
-      - db_data:/var/lib/mysql
+      - /home/traver/docker/monitoring/db:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mariadb-admin ping -h localhost -uroot -p$${MARIADB_ROOT_PASSWORD} --silent"]
       interval: 10s
@@ -86,7 +86,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - librenms_data:/data
+      - /home/traver/docker/monitoring/librenms:/data
     restart: unless-stopped
 
   dispatcher:
@@ -107,7 +107,7 @@ services:
     environment:
       - SIDECAR_DISPATCHER=1
     volumes:
-      - librenms_data:/data
+      - /home/traver/docker/monitoring/librenms:/data
     restart: unless-stopped
 
   syslogng:
@@ -131,7 +131,7 @@ services:
       - "514:514/tcp"
       - "514:514/udp"
     volumes:
-      - librenms_data:/data
+      - /home/traver/docker/monitoring/librenms:/data
     restart: unless-stopped
 
   snmptrapd:
@@ -155,7 +155,7 @@ services:
       - "162:162/tcp"
       - "162:162/udp"
     volumes:
-      - librenms_data:/data
+      - /home/traver/docker/monitoring/librenms:/data
     restart: unless-stopped
 
   prometheus:
@@ -174,7 +174,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/rules:/etc/prometheus/rules:ro
-      - prometheus_data:/prometheus
+      - /home/traver/docker/monitoring/prometheus:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -190,7 +190,7 @@ services:
       - "9093:9093"
     volumes:
       - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-      - alertmanager_data:/alertmanager
+      - /home/traver/docker/monitoring/alertmanager:/alertmanager
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml
       - --storage.path=/alertmanager
@@ -252,7 +252,7 @@ services:
     ports:
       - "8086:8086"
     volumes:
-      - influxdb_data:/var/lib/influxdb2
+      - /home/traver/docker/monitoring/influxdb:/var/lib/influxdb2
     restart: unless-stopped
 
   grafana:
@@ -275,14 +275,6 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana_data:/var/lib/grafana
+      - /home/traver/docker/monitoring/grafana:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     restart: unless-stopped
-
-volumes:
-  db_data:
-  librenms_data:
-  prometheus_data:
-  alertmanager_data:
-  influxdb_data:
-  grafana_data:
