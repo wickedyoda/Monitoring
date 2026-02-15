@@ -66,3 +66,33 @@ Cleared syslog entries older than 30 days (0 rows)
 Cleared syslog entries older than 30 days (0 rows)
 Cleared syslog entries older than 30 days (0 rows)
 Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Storing Mac OUI in the database
+  -> Downloading ...
+  -> Processing CSV ...
+  -> Saving results ...
+Successfully updated. 56363 modified OUIs
+Cleared syslog entries older than 30 days (0 rows)
+[ Sun, 15 Feb 2026 03:53:01 +0100 ] LibreNMS https://www.librenms.org/notifications.rss (48)
+[ Sun, 15 Feb 2026 03:53:01 +0100 ] local misc/notifications.rss (53)
+[ Sun, 15 Feb 2026 03:53:01 +0100 ] Updating DB  Done
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
+Cleared syslog entries older than 30 days (0 rows)
