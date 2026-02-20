@@ -1,0 +1,6 @@
+[2026-02-20T00:37:25][ALERT] INFO: device:discover 10.0.84.3 (1) discovered in 9.723s  
+[2026-02-20T00:37:34][ALERT] INFO: device:poll 10.0.84.3 (1) polled in 7.064s  
+[2026-02-20T00:42:34][ALERT] INFO: device:poll 10.0.84.3 (1) polled in 5.413s  
+[2026-02-20T00:47:35][ALERT] INFO: device:poll 10.0.84.3 (1) polled in 5.243s  
+[2026-02-20T00:52:37][ALERT] INFO: device:poll 10.0.84.3 (1) polled in 5.297s  
+[2026-02-20T00:57:38][ALERT] INFO: device:poll 10.0.84.3 (1) polled in 5.395s  

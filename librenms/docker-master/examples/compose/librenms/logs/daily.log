@@ -53,3 +53,36 @@ Deleting alert_logs more than 365 days that are not active
 Deleting history of active alert_logs more than 365 days
 All deleted ports now purged
 Returned: 0
+Updating SQL-Schema
+
+   INFO  Nothing to migrate.  
+Returned: 0
+Cleaning up DB
+Refreshing alert rules queries
+Refreshing device group table relationships
+Deleting alert_logs more than 365 days that are not active
+Deleting history of active alert_logs more than 365 days
+All deleted ports now purged
+Returned: 0
+Updating SQL-Schema
+
+   INFO  Nothing to migrate.  
+Returned: 0
+Cleaning up DB
+Refreshing alert rules queries
+Refreshing device group table relationships
+Deleting alert_logs more than 365 days that are not active
+Deleting history of active alert_logs more than 365 days
+All deleted ports now purged
+Returned: 0
+Updating SQL-Schema
+
+   INFO  Nothing to migrate.  
+Returned: 0
+Cleaning up DB
+Refreshing alert rules queries
+Refreshing device group table relationships
+Deleting alert_logs more than 365 days that are not active
+Deleting history of active alert_logs more than 365 days
+All deleted ports now purged
+Returned: 0

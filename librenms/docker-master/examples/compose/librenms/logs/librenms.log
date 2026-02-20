@@ -638,3 +638,11 @@ Stack trace:
 #32 /opt/librenms/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(195): Illuminate\Foundation\Console\Kernel->bootstrap()
 #33 /opt/librenms/lnms(35): Illuminate\Foundation\Console\Kernel->handle()
 #34 {main}  
+[2026-02-18T17:35:50][ERROR] SQLSTATE[HY000]: General error: 2006 MySQL server has gone away (Connection: dbFacile, SQL: SELECT `device_id` FROM devices WHERE `hostname` = librenms-syslogng OR `sysName` = librenms-syslogng)#0 /opt/librenms/includes/syslog.php(15): dbFetchCell()
+#1 /opt/librenms/includes/syslog.php(60): get_cache()
+#2 /opt/librenms/syslog.php(22): process_syslog()
+#3 {main}  
+[2026-02-18T17:35:50][ERROR] SQLSTATE[HY000]: General error: 2006 MySQL server has gone away (Connection: dbFacile, SQL: SELECT `device_id` FROM `ipv4_addresses` AS A, `ports` AS I WHERE A.ipv4_address = librenms-syslogng AND I.port_id = A.port_id)#0 /opt/librenms/includes/syslog.php(21): dbFetchCell()
+#1 /opt/librenms/includes/syslog.php(60): get_cache()
+#2 /opt/librenms/syslog.php(22): process_syslog()
+#3 {main}  

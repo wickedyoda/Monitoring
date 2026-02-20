@@ -1,0 +1,200 @@
+name: librenms
+
+services:
+  db:
+    image: mariadb:10
+    container_name: librenms_db
+    env_file:
+      - "./env.env"
+    command:
+      - "mysqld"
+      - "--innodb-file-per-table=1"
+      - "--lower-case-table-names=0"
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
+    volumes:
+      - "librenms-db:/var/lib/mysql"
+    environment:
+      - "MARIADB_RANDOM_ROOT_PASSWORD=yes"
+    restart: always
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: librenms_redis
+    env_file:
+      - "./env.env"
+    restart: always
+
+  librenms:
+    image: librenms/librenms:latest
+    container_name: librenms
+    hostname: librenms
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    ports:
+      - target: 8000
+        published: 8000
+        protocol: tcp
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - "librenms-data:/data"
+    env_file:
+      - "./env.env"
+    environment:
+      - "DB_HOST=db"
+      - "DB_TIMEOUT=60"
+    restart: always
+
+  dispatcher:
+    image: librenms/librenms:latest
+    container_name: librenms_dispatcher
+    hostname: librenms-dispatcher
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      - librenms
+      - redis
+    volumes:
+      - "librenms-data:/data"
+    env_file:
+      - "./env.env"
+    environment:
+      - "DB_HOST=db"
+      - "DB_TIMEOUT=60"
+      - "DISPATCHER_NODE_ID=dispatcher1"
+      - "SIDECAR_DISPATCHER=1"
+    restart: always
+
+  syslogng:
+    image: librenms/librenms:latest
+    container_name: librenms_syslogng
+    hostname: librenms-syslogng
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      - librenms
+      - redis
+    ports:
+      - target: 514
+        published: 514
+        protocol: tcp
+      - target: 514
+        published: 514
+        protocol: udp
+    volumes:
+      - "librenms-data:/data"
+    env_file:
+      - "./env.env"
+    environment:
+      - "DB_HOST=db"
+      - "DB_TIMEOUT=60"
+      - "SIDECAR_SYSLOGNG=1"
+    restart: always
+
+  snmptrapd:
+    image: librenms/librenms:latest
+    container_name: librenms_snmptrapd
+    hostname: librenms-snmptrapd
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      - librenms
+      - redis
+    ports:
+      - target: 162
+        published: 162
+        protocol: tcp
+      - target: 162
+        published: 162
+        protocol: udp
+    volumes:
+      - "librenms-data:/data"
+    env_file:
+      - "./env.env"
+    environment:
+      - "DB_HOST=db"
+      - "DB_TIMEOUT=60"
+      - "SIDECAR_SNMPTRAPD=1"
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    depends_on:
+      - node_exporter
+    ports:
+      - target: 9090
+        published: 9090
+        protocol: tcp
+    volumes:
+      - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+      - "prometheus-data:/prometheus"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+    restart: always
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    pid: host
+    ports:
+      - target: 9100
+        published: 9100
+        protocol: tcp
+    volumes:
+      - "/proc:/host/proc:ro"
+      - "/sys:/host/sys:ro"
+      - "/:/rootfs:ro"
+      - "/run/udev:/run/udev:ro"
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|run/docker/netns)($|/)"
+    restart: always
+
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb
+    env_file:
+      - "./env.env"
+    ports:
+      - target: 8086
+        published: 8086
+        protocol: tcp
+    volumes:
+      - "influxdb-data:/var/lib/influxdb2"
+    restart: always
+
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+      - influxdb
+    env_file:
+      - "./env.env"
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+    volumes:
+      - "grafana-data:/var/lib/grafana"
+      - "./grafana/provisioning:/etc/grafana/provisioning:ro"
+    restart: always
+
+volumes:
+  librenms-db:
+  librenms-data:
+  prometheus-data:
+  influxdb-data:
+  grafana-data:

@@ -1,49 +1,39 @@
-# Unified Monitoring Stack
+# Prometheus + InfluxDB + Grafana Stack
 
-This repository now runs a single monitoring system where infrastructure, services, and application endpoints are visible in one place.
+This repository now runs a focused monitoring stack for a Debian Arm64 host:
 
-## What Is Integrated
+- Prometheus (metrics collection and query)
+- Node Exporter (host metrics source for Prometheus)
+- InfluxDB (separate time-series store)
+- Grafana (dashboarding with both data sources)
 
-- LibreNMS for network discovery, SNMP polling, syslog, and traps
-- Prometheus for metrics collection and alert evaluation
-- Alertmanager for centralized alert routing
-- Blackbox Exporter for HTTP/TCP synthetic checks
-- Node Exporter and cAdvisor for host and container metrics
-- InfluxDB for time-series workloads that need Flux queries
-- Grafana for cross-system dashboards and alert views
+## Important Architecture Note
 
-## How Systems Share Information
-
-- Prometheus scrapes exporters and probes all major services, so uptime and performance are centralized.
-- Alert rules are evaluated once in Prometheus and routed through Alertmanager.
-- Grafana is pre-provisioned with data sources for:
-  - Prometheus metrics
-  - InfluxDB metrics
-  - Alertmanager alert state
-  - LibreNMS MySQL data (inventory/events/metadata)
-- LibreNMS, Prometheus, and InfluxDB can all be correlated inside Grafana dashboards.
+Prometheus does not use InfluxDB as its primary TSDB. Prometheus always stores locally in `/prometheus`.
+InfluxDB runs alongside it, and Grafana can query both systems.
 
 ## Startup
 
-1. Update secrets and credentials in `env.env`.
-2. Start everything:
+1. Ensure these directories exist on the host:
+   - `/home/traver/docker/monitoring/prometheus`
+   - `/home/traver/docker/monitoring/influxdb`
+   - `/home/traver/docker/monitoring/grafana`
+2. Update credentials in `env.env` (especially InfluxDB and Grafana admin password).
+3. Start stack:
 
 ```bash
 docker compose up -d
 ```
 
-3. Open interfaces:
-   - LibreNMS: `http://localhost:8000`
-   - Prometheus: `http://localhost:9090`
-   - Alertmanager: `http://localhost:9093`
-   - Grafana: `http://localhost:3000`
-   - InfluxDB: `http://localhost:8086`
+## Access
+
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000`
+- InfluxDB: `http://localhost:8086`
+- Node Exporter: `http://localhost:9100/metrics`
 
 ## Key Config Files
 
 - `docker-compose.yml`
 - `prometheus/prometheus.yml`
-- `prometheus/rules/system-alerts.yml`
-- `alertmanager/alertmanager.yml`
-- `blackbox/blackbox.yml`
 - `grafana/provisioning/datasources/datasources.yml`
