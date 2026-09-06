@@ -1,0 +1,39 @@
+{
+  "repo": "wickedyoda/Monitoring",
+  "timestamp": "2026-09-06T18:03:16Z",
+  "findings": {
+    "secrets": [
+      {
+        "severity": "CRITICAL",
+        "file": "env.env",
+        "line": 8,
+        "issue": "Hardcoded MARIADB_PASSWORD in tracked file",
+        "fix": "Removed env.env from git, created env.env.example with placeholders"
+      },
+      {
+        "severity": "CRITICAL",
+        "file": "env.env",
+        "line": 35,
+        "issue": "Hardcoded DOCKER_INFLUXDB_INIT_PASSWORD in tracked file",
+        "fix": "Removed env.env from git, created env.env.example with placeholders"
+      },
+      {
+        "severity": "CRITICAL",
+        "file": "env.env",
+        "line": 38,
+        "issue": "Hardcoded DOCKER_INFLUXDB_INIT_ADMIN_TOKEN in tracked file",
+        "fix": "Removed env.env from git, created env.env.example with placeholders"
+      }
+    ],
+    "code_vulnerabilities": [],
+    "dependency_issues": [],
+    "supply_chain": []
+  },
+  "summary": {
+    "critical": 3,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "total": 3
+  }
+}

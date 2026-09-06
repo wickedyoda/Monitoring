@@ -1,0 +1,5 @@
+.env
+*.env
+bandit-results.json
+npm-audit.json
+pip-audit.json
