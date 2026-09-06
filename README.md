@@ -1,51 +1,42 @@
 # WickedYoda Homelab Monitoring Stack
 
-Unified monitoring with LibreNMS, Prometheus, Grafana, InfluxDB, and Loki.
+Unified network, metrics, and log monitoring for the homelab.
 
-## Stack
+## Documentation
 
-### Core
-- **LibreNMS** — network device monitoring via SNMP (`:8000`)
-- **MariaDB** — database for LibreNMS + Grafana
-- **Redis** — cache/session for LibreNMS
-- **msmtpd** — SMTP relay for alerts
+- **[STACK.md](docs/STACK.md)** — Architecture, data flow, service topology
+- **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** — Step-by-step setup guide
+- **[ALERTING.md](docs/ALERTING.md)** — Alert rules, receivers, and notification setup
 
-### Metrics & Alerting
-- **Prometheus** — time-series metrics (`:9090`)
-- **Alertmanager** — alert routing (`:9093`)
-- **Grafana** — visualization (`:3000`)
-- **InfluxDB v2** — long-term metrics store (`:8086`)
+## What This Stack Does
 
-### Exporters
-- **Node Exporter** — host metrics (`:9100`)
-- **cAdvisor** — container metrics (`:8080`)
-- **Blackbox Exporter** — HTTP/TCP probes (`:9115`)
-- **Redis Exporter** — Redis metrics (`:9121`)
-- **SNMP Exporter** — network device metrics (`:9116`)
-- **Ping Exporter** — ICMP latency/uptime (`:9273`)
-- **Process Exporter** — process monitoring (`:9256`)
-- **SpeedTest Exporter** — bandwidth tests (`:9430`)
-- **Tailscale Exporter** — tailnet peer health (`:9184`)
-
-### Logging
-- **Loki** — log aggregation (`:3100`)
-- **Promtail** — log collection agent
-
-### Operations
-- **Uptime Kuma** — status page + notifications (`:3001`)
-- **Grafana Image Renderer** — PNG exports (`:8081`)
+- Discovers and polls network devices via SNMP
+- Collects host, container, and application metrics
+- Runs HTTP/TCP/ICMP probes for uptime and latency
+- Aggregates logs from syslog and Docker containers
+- Visualizes everything in Grafana
+- Alerts through Alertmanager
+- Provides a status page and notifications via Uptime Kuma
 
 ## Quick Start
 
 ```bash
+git clone https://github.com/wickedyoda/Monitoring.git
+cd Monitoring
 cp env.env.example env.env
-# Edit env.env with your settings, especially:
-# - Grafana admin password
-# - InfluxDB admin token
-# - MariaDB passwords
-# - Tailscale API key
+# Edit env.env with your settings
 docker compose up -d
 ```
+
+## Stack Overview
+
+| Category | Services |
+|----------|----------|
+| Core | LibreNMS, MariaDB, Redis, msmtpd |
+| Metrics | Prometheus, Alertmanager, Grafana, InfluxDB |
+| Exporters | Node, cAdvisor, Blackbox, Redis, SNMP, Ping, Process, SpeedTest, Tailscale |
+| Logging | Loki, Promtail |
+| Operations | Uptime Kuma, Grafana Image Renderer |
 
 ## Volumes
 
@@ -58,14 +49,12 @@ docker compose up -d
 - `loki_data` — Loki chunks/index
 - `uptime_kuma_data` — Uptime Kuma data
 
-## Network Notes
+## Branch Policy
 
-- All exporters use `linux/arm64` platform for Raspberry Pi / ARM hosts
-- SNMP Exporter config: `./snmp/snmp.yml`
-- Ping Exporter config: `./ping/ping.yml`
-- Process Exporter config: `./process/process.yml`
-- Loki config: `./loki/loki.yml`
-- Promtail config: `./promtail/promtail.yml`
+- `main` — canonical branch
+- `master` — mirrors main
+- All changes via PR with required review
+- Default branch: `main`
 
 ## License
 
