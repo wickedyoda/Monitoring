@@ -1,0 +1,37 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          host: docker2
+          __path__: /var/log/syslog
+
+  - job_name: containers
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          host: docker2
+          __path__: /var/lib/docker/containers/*/*.log
+
+  - job_name: outdoor-ap
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: outdoor-ap
+          host: 10.0.85.17
+          __path__: /var/log/syslog/*outdoor*.log

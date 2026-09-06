@@ -1,0 +1,41 @@
+targets:
+  - name: flint4
+    host: 10.0.84.1
+    count: 3
+    interval: 30s
+  - name: outdoor-ap
+    host: 10.0.85.17
+    count: 3
+    interval: 30s
+  - name: dell-switch
+    host: 10.0.85.31
+    count: 3
+    interval: 30s
+  - name: nas
+    host: 10.0.85.10
+    count: 3
+    interval: 30s
+  - name: rasp1
+    host: 10.0.85.11
+    count: 3
+    interval: 30s
+  - name: docker2
+    host: 100.117.162.55
+    count: 3
+    interval: 30s
+  - name: serv1
+    host: 100.76.68.53
+    count: 3
+    interval: 30s
+  - name: serv2
+    host: 100.111.145.66
+    count: 3
+    interval: 30s
+  - name: recipe
+    host: 100.125.168.30
+    count: 3
+    interval: 30s
+  - name: problem-child
+    host: 100.86.100.18
+    count: 3
+    interval: 30s

@@ -32,7 +32,7 @@ services:
       \"CREATE DATABASE IF NOT EXISTS $${GRAFANA_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
       CREATE USER IF NOT EXISTS '$${GRAFANA_USER}'@'%' IDENTIFIED BY '$${GRAFANA_PASSWORD}';
       GRANT ALL PRIVILEGES ON $${GRAFANA_DATABASE}.* TO '$${GRAFANA_USER}'@'%';
-      FLUSH PRIVILEGES;\"
+      FLUSH PRIVILEGES;\" 
       "
     restart: "no"
 
@@ -140,6 +140,11 @@ services:
       - blackbox_exporter
       - cadvisor
       - node_exporter
+      - redis_exporter
+      - snmp_exporter
+      - ping_exporter
+      - process_exporter
+      - tailscale_exporter
     ports:
       - "9090:9090"
     volumes:
@@ -240,11 +245,128 @@ services:
         condition: service_started
       influxdb:
         condition: service_started
+      loki:
+        condition: service_started
     ports:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    restart: unless-stopped
+
+  grafana-image-renderer:
+    image: grafana/grafana-image-renderer:latest
+    container_name: grafana-image-renderer
+    platform: linux/arm64
+    environment:
+      - ENABLE_METRICS=true
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  redis_exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis_exporter
+    platform: linux/arm64
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://librenms_redis:6379
+    restart: unless-stopped
+
+  snmp_exporter:
+    image: prom/snmp-exporter:latest
+    container_name: snmp_exporter
+    platform: linux/arm64
+    ports:
+      - "9116:9116"
+    volumes:
+      - ./snmp/snmp.yml:/etc/snmp_exporter/snmp.yml:ro
+    command:
+      - --config.file=/etc/snmp_exporter/snmp.yml
+    restart: unless-stopped
+
+  ping_exporter:
+    image: facelinemark/ping_exporter:latest
+    container_name: ping_exporter
+    platform: linux/arm64
+    ports:
+      - "9273:9273"
+    volumes:
+      - ./ping/ping.yml:/etc/ping_exporter/config.yml:ro
+    command:
+      - --config.file=/etc/ping_exporter/config.yml
+    restart: unless-stopped
+
+  process_exporter:
+    image: ncabatoff/process-exporter:latest
+    container_name: process_exporter
+    platform: linux/arm64
+    ports:
+      - "9256:9256"
+    volumes:
+      - /proc:/host/proc:ro
+      - ./process/process.yml:/etc/process_exporter/config.yml:ro
+    command:
+      - --procfs=/host/proc
+      - --config.file=/etc/process_exporter/config.yml
+    restart: unless-stopped
+
+  speedtest_exporter:
+    image: miguelsilva/speedtest_exporter:latest
+    container_name: speedtest_exporter
+    platform: linux/arm64
+    ports:
+      - "9430:9430"
+    environment:
+      - SPEEDTEST_SERVER=0
+      - SPEEDTEST_INTERVAL=3600
+    restart: unless-stopped
+
+  tailscale_exporter:
+    image: mzfr/tailscale-exporter:latest
+    container_name: tailscale_exporter
+    platform: linux/arm64
+    ports:
+      - "9184:9184"
+    environment:
+      - TAILSCALE_API_KEY=${TAILSCALE_API_KEY}
+      - TAILSCALE_TAILNET=${TAILSCALE_TAILNET}
+    volumes:
+      - /var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock:ro
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    platform: linux/arm64
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    platform: linux/arm64
+    volumes:
+      - ./promtail/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    platform: linux/arm64
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime_kuma_data:/app/data
     restart: unless-stopped
 
 volumes:
@@ -254,3 +376,5 @@ volumes:
   alertmanager_data:
   influxdb_data:
   grafana_data:
+  loki_data:
+  uptime_kuma_data:
